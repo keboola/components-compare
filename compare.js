@@ -15,8 +15,8 @@ app.get('/components-compare', compareAction);
 
 function compareAction(req, res) {
   runComparsion(
-    'https://connection-sync-test.devel.keboola.com/v2/storage',
-    'https://connection.keboola.com/v2/storage'
+    req.query.current ? req.query.current : 'https://connection-sync-test.devel.keboola.com/v2/storage',
+    req.query.reference ? req.query.reference : 'https://connection.keboola.com/v2/storage'
   )
   .then(function(results) {
     res.send(JSON.stringify(results));
@@ -42,25 +42,26 @@ function runComparsion(stack1host, stack2host) {
       }
     }
   }).then(function(stacks) {
-    var diffs =  _.chain(_.intersection(_.keys(stacks.stack1.components), _.keys(stacks.stack2.components)))
-      .map(function(key) {
-        return compare(stacks.stack1.components[key], stacks.stack2.components[key]);
-      })
-      .filter(function(component) {
-        return !_.isEmpty(component.diff);
-      })
-      .value();
-
     return {
       currentStack: stacks.stack1.host,
       referenceStack: stacks.stack2.host,
       moreover: _.difference(_.keys(stacks.stack1.components), _.keys(stacks.stack2.components)),
       missing: _.difference(_.keys(stacks.stack2.components), _.keys(stacks.stack1.components)),
-      diffs: diffs
+      diffs: createDiffs(stacks)
     };
   });
 }
 
+function createDiffs(stacks) {
+  return _.chain(_.intersection(_.keys(stacks.stack1.components), _.keys(stacks.stack2.components)))
+    .map(function(key) {
+      return compare(stacks.stack1.components[key], stacks.stack2.components[key]);
+    })
+    .filter(function(component) {
+      return !_.isEmpty(component.diff);
+    })
+    .value();
+}
 
 function compare(component1, component2) {
   return {

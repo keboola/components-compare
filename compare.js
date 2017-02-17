@@ -16,6 +16,13 @@ app.get('/', function (req, res) {
   });
 });
 
+
+app.get('/components-compare', function (req, res) {
+  runComparsion().then(function(results) {
+    res.send(JSON.stringify(results));
+  });
+});
+
 app.listen(PORT);
 console.log('Running on http://localhost:' + PORT);
 

@@ -1,4 +1,4 @@
-var _ = require('underscore');
+var _ = require('lodash');
 var rp = require('request-promise');
 var Promise = require('bluebird');
 var diff = require('recursive-diff');
@@ -33,11 +33,11 @@ function runComparsion(stack1host, stack2host) {
   }).then(function(response) {
     return {
       stack1: {
-        components: _.indexBy(JSON.parse(response.stack1).components, 'id'),
+        components: _.keyBy(JSON.parse(response.stack1).components, 'id'),
         host: stack1host
       },
       stack2: {
-        components: _.indexBy(JSON.parse(response.stack2).components, 'id'),
+        components: _.keyBy(JSON.parse(response.stack2).components, 'id'),
         host: stack2host
       }
     }
@@ -66,7 +66,7 @@ function createDiffs(stacks) {
 function compare(component1, component2) {
   return {
     component: component1.id,
-    diff: diff.getDiff(cleanComponent(component1), cleanComponent(component2))
+    diff: diff.getDiff(cleanComponent(setComponentDefaults(component1)), cleanComponent(setComponentDefaults(component2)))
   };
 }
 
@@ -78,5 +78,22 @@ function cleanComponent(component) {
     })
     .omit(['ico32', 'ico64'])
     .value();
+}
+
+var componentsDefaults = {
+  data: {
+    forward_token: false,
+    network: "bridge",
+    forward_token_details: false,
+    default_bucket: false,
+    configuration_format: "json",
+    staging_storage: {
+        "input": "local"
+    }
+  }
+};
+
+function setComponentDefaults(component) {
+  return _.defaultsDeep(component, componentsDefaults);
 }
 

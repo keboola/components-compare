@@ -80,20 +80,18 @@ function cleanComponent(component) {
     .value();
 }
 
-var componentsDefaults = {
-  data: {
-    forward_token: false,
-    network: "bridge",
-    forward_token_details: false,
-    default_bucket: false,
-    configuration_format: "json",
-    staging_storage: {
-        "input": "local"
-    }
-  }
-};
-
 function setComponentDefaults(component) {
-  return _.defaultsDeep(component, componentsDefaults);
+  return _.defaultsDeep(component, {
+    data: {
+      forward_token: false,
+      network: "bridge",
+      forward_token_details: false,
+      default_bucket: false,
+      configuration_format: "json",
+      staging_storage: {
+        "input": "local"
+      }
+    }
+  });
 }
 
